@@ -1,11 +1,11 @@
-## Miterm Report
+# Midterm Report
 
 ### Problem Statement
 Can using relevant news articles make a significant addition to stock price prediction models?
 
 ### Dataset
 
-Our dataset consists of news articles from the NY Times, stock data from Facebook, Netflix, Amazon, Google, and Apple, and stock index data for the Dow Jones Industrial Average and the S&P 500.
+Our dataset consists of news articles from the NY Times, stock data from Facebook, Netflix, Amazon, Google, and Apple, and stock index data for the Dow Jones Industrial Average and the S&P 500. All of our data ranges over the span of nearly three years, from January 1, 2017 to October 31, 2019, although our stock and index data does not include weekends or holidays, as the markets are closed on these days.
 
 #### NY Times Articles
 
@@ -14,12 +14,18 @@ Our dataset consists of news articles from the NY Times, stock data from Faceboo
 ### Modeling
 
 #### Baseline
+We plan on using models that are trained without news data as our baseline models. If we can see a significant improvement after modeling with the news data as a feature, then we will have good evidence that news data can be used as a supplemental data source to usefully improve stock price prediction. 
+
+Some simple methods we can use to produce baseline predictions include:
+    - Predicting the previous day's price as the current day's price (last value prediction)
+    - Using a moving average of prices for the past n days to predict the current day's price
+    - Using a time series based linear regression without news data and with the previous n days as features
 
 #### Advanced 
 
-### Testing 
 
-#### Metrics 
+### Testing 
+To test our models, we plan on comparing the RMSE of our baseline models with the RMSE of our advanced models. 
 
 ### What Next?
 
