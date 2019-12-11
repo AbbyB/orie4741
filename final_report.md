@@ -49,6 +49,10 @@ We decided to approach the problem by constructing and/or training models with a
 
 ### Baseline Models
 
+After cleaning our dataset, we decided our next step was to begin constructing a few baseline models. To do so, we first put eighty percent of our data into a training set and the remaining twenty percent into a test set. After this, we built our first baseline classification model that predicted the most common stock value as the label for each respective stock. We then determined accuracy on the test set and received accuracy values ranging between 50-55%. Our next baseline classification model predicted the previous day’s price as the current day’s price. We anticipated that this would be more accurate than the previous model but we instead received accuracy values ranging between 47-52%. Thereafter, we tried one more baseline classification model that used a moving average of prices for the previous n days to predict the current day’s stock price, where we varied ‘n’ between the values of 3, 5, 7, and 9 to see if the variation affected our accuracy outputs at all. For each respective stock, our accuracy varied from 46-52%. Therefore, out of all of our baseline classification models, using the most common stock value seemed to be the most accurate predictor.
+
+Next, we pursued plotting a few of these baseline models as regression models. For these models, we used mean squared error to evaluate our model fit. 
+
 #### Classification 
 - Most Common Value - using the most common value in a training set as the prediction for test data
 - Last Value - using the previous day's movement as the prediction for the current day
@@ -86,36 +90,56 @@ The news features we created and found most useful included
 - A bag of words encoding for the abstract and full_headline for each article
 - Sentiment analysis including positivity, negativity, neutrality, polarity, and subjectivity, and a compound score on the abstract and full_headline of each article
 - N-grams with n=2 and n=3. This is very similar to our bag of words model but with the occurrence of n words in combination rather than single words encoded in a many-hot style.
-- PCA with 10-20 principal components on either all of our features or just our bag of words and n-gram feature set
+- PCA with 5-10 principal components on either all of our features or just our bag of words and n-gram feature set
 
 ### Modeling 
-Our first model that we trained on all of our features (news data included) was a logistic regression model. We continued with a basic accuracy measurement and a weighted accuracy measurement to determine the fit of our model.
+For our modelling, we tried two different approaches to handle the fact that we had varying number of articles for each day and no way to rank their importance. The first method was condensing all of the articles for each day into a single data point of features. As the majority of our features are numeric, we could average them. For the headline feature, we just concatenated all of the headlines into one very long headline. The method is referred as 'Days Average'. The second method was a little trickier. When training, we left each article as a data point. This meant that each day would go through training multiple times with different features. Then for testing, we ran all of that day's articles through the model and averaged the output (median for regression and mode for classification). 
 
-Next we tried a linear regression model that used a daily average for all of the x and y datasets. For this model, we measured fit via mean squared error. The error values for all of our included stocks were approximately zero to two decimal places with the exception of Netflix. We then considered a logistic regression model that also used a daily average for all of the x and y datasets and measured fit via mean accuracy on the test sets. Our observed accuracy ranged from 47-55% for this model. Next, we considered the same logistic regression model but added principal component analysis (PCA) and sentiment. This model gave accuracy values ranging from 50-56% for each of the included stocks. Finally, we explored a stacked regression and classification with all of the features included. We stacked two classifier models: the first one being a basic logistic regression on the training set to predict an increase or decrease in stock price, the second one being another logistic regression that predicted which classifiers from the first regression are best. We then fit a linear regression model to predict the difference and a classification model to predict either an increase or decrease in stock prices. The accuracy values ranged from 51-55%.
+Our first models that we trained on all of our features (news data included) were a linear regression and logistic regression model using the Days Average method. We measured the models with the mean squared error and basic accuracy score, respectively. For classification, our observed accuracy ranged from 47-55%. For regression, it was our poorest model. Next, we considered the same logistic regression model but used only the bag of words principal component analysis (PCA) and sentiment analysis features. This model gave accuracy values ranging from 50-56% for each of the included stocks. 
 
-After cleaning our dataset, we decided our next step was to begin constructing a few baseline models. To do so, we first put eighty percent of our data into a training set and the remaining twenty percent into a test set. After this, we built our first baseline classification model that predicted the most common stock value as the label for each respective stock. We then determined accuracy on the test set and received accuracy values ranging between 50-55%. Our next baseline classification model predicted the previous day’s price as the current day’s price. We anticipated that this would be more accurate than the previous model but we instead received accuracy values ranging between 47-52%. Thereafter, we tried one more baseline classification model that used a moving average of prices for the previous n days to predict the current day’s stock price, where we varied ‘n’ between the values of 3, 5, 7, and 9 to see if the variation affected our accuracy outputs at all. For each respective stock, our accuracy varied from 46-52%. Therefore, out of all of our baseline classification models, using the most common stock value seemed to be the most accurate predictor.
-
-Next, we pursued plotting a few of these baseline models as regression models. For these models, we used mean squared error to evaluate our model fit. We began with the model that predicted the previous day’s price as the current day’s price. As you can see in the figure below, the predictions don’t seem to differ too much from the actual values. 
+Finally, we explored a stacked regression and classification with all of the features included. We stacked two classifier models: the first one being a basic logistic regression on the training set to predict an increase or decrease in stock price, the second one being another logistic regression that predicted which articles the previous model predicted correctly. This gave us a relevancy score for each article. We then fit a linear regression model to predict the difference and a classification model to predict either an increase or decrease in stock prices. The accuracy values ranged from 51-55%. When attempting to use a similar stacked model that took advantage of all of these other models we had built, the results were below most of the individual component models. 
 
 #### Classification
 We trained a logistic regression using several different feature sets to incorporate our news data. These included
-- Bag of words
-- PCA on all features
-- Days Average
-- Days Average: Bag of Words PCA and Sentiment
-- All Articles
-- Stacked 
+- Bag of words - Days Average method using only 2-word pairs from headlines
+- PCA on all features - Ran PCA on all features and used first 5 components
+- Days Average - Days Average method with all features
+- Days Average: Bag of Words PCA and Sentiment - Days Average method with only bag of words PCA and sentiment features
+- All Articles - All features
+- Stacked - Stacked models to get an article reliability score
 
 ![Classification Models](./ClassificationModels.png)
 
 #### Regression
-- Bag of Words
-- Days Average
-- All Articles
-- Stacked
+- Bag of Words - Days Average method using only 2-word pairs from headlines
+- Days Average - Days Average method with all features
+- All Articles - All features
+- Stacked - Stacked models to get an article reliability score
 
 ![Regression Models](./RegressionModels.png)
 
+### Results
+We were surprised to see that no one model performed well on all of the stocks.
+
+#### Classification
+For each stock, at least one of our classifiers managed to exceed the baseline.
+Apple: the Bag of Words classifier exceeded the best baseline by roughly 4.5%
+Facebook: the All Articles classifier improved beyond the baseline by roughly 1.5%
+Netflix: the Bag of Words classifier performed about 2.5% better than the baseline
+Amazon: the Bag of Words classifier was roughly 1.5% improved over the baseline
+Google: the Days Average classifier exceed the baseline by about 1%
+DJIA: multiple classifiers performed about 0.3% better than the baseline
+S&P500: the Bag of Words classifier was approximately a 1.5% improvement over the baseline
+
+#### Regression
+Regression was trickier with none of the stocks falling below the baseline. Additionally, our three best models (Bag of Words, All Articles, and Stacked) all performed roughly the same 
+Apple: did not go below the baseline 
+Facebook: did not go below the baseline
+Netflix: basically reached the baseline
+Amazon: did not go below the baseline
+Google: did not go below the baseline
+DJIA: did not go below the baseline
+S&P500: did not go below the baseline
 
 ## Weapons of Math Destruction and Fairness
 We believe that our project, or the use of news data to predict stock prices in general, could be considered a weapon of math destruction in that a self-fulfilling feedback loop could be created if many companies choose to invest based on this decision making process. If large amounts of a stock are in demand because a model predicts its price will rise and many firms choose to invest in the stock, this will cause the stock’s price to go up. The opposite is also true. While this is definitely a concern for news based stock prediction models, this same problem exists for any stock prediction model. We believe this is the main element of math destruction at play, since while a false positive or negative could lead to a loss of money from a potential stakeholder, this is true of any model predicting stock prices and it is up to the user's discretion whether they should make a decision based on the model. Our project is fair as there are no predictions made based on grouping specific people into categories - no discrimination is really possible here.
@@ -127,3 +151,10 @@ We found that the addition of news data slightly contributed to the predictive p
 
 ## References 
 https://www.investopedia.com/articles/trading/07/stationary.asp
+
+
+
+
+```python
+
+```
